@@ -3,9 +3,8 @@ import 'package:supabase/supabase.dart';
 
 // ignore: camel_case_types
 class supabaseHandler {
-  static String supabaseURL = "https://cmqlaoxbbkvohooslnrm.supabase.co";
-  static String supabaseKey =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtcWxhb3hiYmt2b2hvb3NsbnJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTEzNzA2OTAsImV4cCI6MjAyNjk0NjY5MH0.6TDmAenO8777wf0xciMXm8JP4RpMYgH2DpefL6S-6uE";
+  static String supabaseURL = "";
+  static String supabaseKey = "";
 
   final client = SupabaseClient(supabaseURL, supabaseKey);
 

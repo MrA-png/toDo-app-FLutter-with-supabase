@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 import 'supabase_handler.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-void main() {
+Future<void> main() async {
+  await Supabase.initialize(
+    url: 'https://cmqlaoxbbkvohooslnrm.supabase.co',
+    anonKey:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtcWxhb3hiYmt2b2hvb3NsbnJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTEzNzA2OTAsImV4cCI6MjAyNjk0NjY5MH0.6TDmAenO8777wf0xciMXm8JP4RpMYgH2DpefL6S-6uE',
+  );
   runApp(const MyApp());
 }
 
@@ -16,21 +22,20 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'ToDO App'),
+      home: const MyHomePage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  final String title;
+  const MyHomePage({Key? key}) : super(key: key);
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  User? _user;
   supabaseHandler supabaseHendler = supabaseHandler();
   late String newValue;
   @override
@@ -43,50 +48,56 @@ class _MyHomePageState extends State<MyHomePage> {
     // String newValue;
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: const Text("Supabase with flutter"),
       ),
       body: FutureBuilder(
-        builder: (context, AsyncSnapshot snapshot) {
+        future: supabaseHendler.readData(context),
+        builder: ((context, AsyncSnapshot snapshot) {
+          print("here ${snapshot.data.toString()}");
           if (snapshot.hasData == null &&
               snapshot.connectionState == ConnectionState.none) {}
-
+          print("here1 ${snapshot.data.toString()}");
           return ListView.builder(
             itemCount: snapshot.data?.length ?? 0,
             itemBuilder: (context, index) {
-              return Container(
-                height: 150,
-                color: snapshot.data?[index]['status'] ?? false
-                    ? Colors.white
-                    : Colors.red,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      width: 200,
-                      child: Text(snapshot.data?[index]['task'] ?? ''),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.done),
-                      onPressed: () {
-                        supabaseHendler.updateData(
-                            snapshot.data[index]['id'], true);
-                        setState(() {});
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () {
-                        supabaseHendler.deleteData(snapshot.data[index]['id']);
-                        setState(() {});
-                      },
-                    ),
-                  ],
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  height: 50,
+                  color: snapshot.data![index]['status']
+                      ? Colors.white
+                      : Colors.red,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        width: 200,
+                        child: Text(snapshot.data![index]['task']),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.done),
+                        onPressed: () {
+                          supabaseHendler.updateData(
+                              snapshot.data[index]['id'], true);
+                          // setState(() {});
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () {
+                          supabaseHendler
+                              .deleteData(snapshot.data[index]['id']);
+                          setState(() {});
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               );
             },
           );
-        },
-        future: supabaseHendler.readData(),
+        }),
+        // future: supabaseHendler.readData(),
       ),
       floatingActionButton: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -102,8 +113,7 @@ class _MyHomePageState extends State<MyHomePage> {
               )),
               FloatingActionButton(
                 onPressed: () {
-                  supabaseHendler.addData(newValue,
-                      false); // perbaiki code line ini karena muncull pesan : the non-nullable variable 'newValue' must be assigned before it can be used
+                  supabaseHendler.addData(newValue, false, context);
                   setState(() {});
                 },
                 child: const Icon(Icons.add),

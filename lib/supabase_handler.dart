@@ -1,42 +1,57 @@
-// ignore_for_file: avoid_print
-import 'package:supabase/supabase.dart';
-
+// ignore_for_file: avoid_print, camel_case_types, duplicate_ignore
 // ignore: camel_case_types
+import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 class supabaseHandler {
-  static String supabaseURL = "";
-  static String supabaseKey = "";
-
-  final client = SupabaseClient(supabaseURL, supabaseKey);
-
-  addData(String taskValue, bool statusValue) {
-    var response = client
-        .from("todo_table")
-        .insert({'task': taskValue, 'status': statusValue}).execute();
-    print(response);
+  addData(String task, bool status, context) async {
+    try {
+      await Supabase.instance.client
+          .from('todo_table')
+          .upsert({'task': task, 'status': status});
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Saved The task0'),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('error saving task'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
-  readData() async {
-    var response = await client
-        .from("todo_table")
-        .select()
-        .order('task', ascending: true)
-        .execute();
-    print(response);
-    final dataList = response.data as List;
-    return dataList;
+  Future<List?> readData(context) async {
+    print('Read Data');
+    try {
+      var response = await Supabase.instance.client.from('todo_table').select();
+      final dataList = response as List;
+      return dataList;
+    } catch (e) {
+      print('Response Error ${e}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Error accured while getting Data'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return null;
+    }
   }
 
-  updateData(int id, bool statusValue) {
-    var response = client
-        .from("todo_table")
-        .update({'status': statusValue})
-        .eq('id', id)
-        .execute();
-    print(response);
+  updateData(int id, bool statusval) async {
+    await Supabase.instance.client
+        .from('todo_table')
+        .upsert({'id': id, 'status': statusval});
   }
 
   deleteData(int id) async {
-    var response = client.from("todo_table").delete().eq('id', id).execute();
-    print(response);
+    await Supabase.instance.client
+        .from('todo_table')
+        .delete()
+        .match({'id': id});
   }
 }
